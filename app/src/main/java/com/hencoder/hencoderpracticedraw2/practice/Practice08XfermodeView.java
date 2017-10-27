@@ -3,8 +3,12 @@ package com.hencoder.hencoderpracticedraw2.practice;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.ComposeShader;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -31,6 +35,7 @@ public class Practice08XfermodeView extends View {
     {
         bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.batman);
         bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.batman_logo);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     @Override
@@ -41,17 +46,21 @@ public class Practice08XfermodeView extends View {
 
         // 别忘了用 canvas.saveLayer() 开启 off-screen buffer
 
-        canvas.drawBitmap(bitmap1, 0, 0, paint);
-        // 第一个：PorterDuff.Mode.SRC
-        canvas.drawBitmap(bitmap2, 0, 0, paint);
+        BitmapShader shader1 = new BitmapShader(bitmap1, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        BitmapShader shader2 = new BitmapShader(bitmap2, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
 
-        canvas.drawBitmap(bitmap1, bitmap1.getWidth() + 100, 0, paint);
+        paint.setShader(new ComposeShader(shader1, shader2, PorterDuff.Mode.SRC));
+        canvas.drawRect(30, 100, 300, 300, paint);
         // 第二个：PorterDuff.Mode.DST_IN
-        canvas.drawBitmap(bitmap2, bitmap1.getWidth() + 100, 0, paint);
 
-        canvas.drawBitmap(bitmap1, 0, bitmap1.getHeight() + 20, paint);
+        canvas.translate(300, 0);
+        paint.setShader(new ComposeShader(shader1, shader2, PorterDuff.Mode.DST_IN));
+        canvas.drawRect(30, 100, 300, 300, paint);
+
+        canvas.translate(0, 200);
         // 第三个：PorterDuff.Mode.DST_OUT
-        canvas.drawBitmap(bitmap2, 0, bitmap1.getHeight() + 20, paint);
+        paint.setShader(new ComposeShader(shader1, shader2, PorterDuff.Mode.DST_OUT));
+        canvas.drawRect(30, 100, 300, 300, paint);
 
         // 用完之后使用 canvas.restore() 恢复 off-screen buffer
     }
